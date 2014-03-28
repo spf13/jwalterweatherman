@@ -12,13 +12,13 @@ import (
 )
 
 func TestLevels(t *testing.T) {
-    SetOutLevel(LevelError)
-    assert.Equal(t, OutLevel(), LevelError)
-    SetLogLevel(LevelCritical)
-    assert.Equal(t, LogLevel(), LevelCritical)
-    assert.NotEqual(t, OutLevel(), LevelCritical)
-    SetOutLevel(LevelWarn)
-    assert.Equal(t, OutLevel(), LevelWarn)
+    SetOutputThreshold(LevelError)
+    assert.Equal(t, OutputThreshold(), LevelError)
+    SetLogThreshold(LevelCritical)
+    assert.Equal(t, LogThreshold(), LevelCritical)
+    assert.NotEqual(t, OutputThreshold(), LevelCritical)
+    SetOutputThreshold(LevelWarn)
+    assert.Equal(t, OutputThreshold(), LevelWarn)
 }
 
 func TestDefaultLogging(t *testing.T) {
@@ -27,23 +27,30 @@ func TestDefaultLogging(t *testing.T) {
     LogHandle = logBuf
     OutHandle = outputBuf
 
-    SetOutLevel(LevelInfo)
-    SetLogLevel(LevelWarn)
+    SetLogThreshold(LevelWarn)
+    SetOutputThreshold(LevelError)
 
+    FATAL.Println("fatal err")
     CRITICAL.Println("critical err")
     ERROR.Println("an error")
     WARN.Println("a warning")
     INFO.Println("information")
     DEBUG.Println("debugging info")
+    TRACE.Println("trace")
 
+    assert.Contains(t, logBuf.String(), "fatal err")
     assert.Contains(t, logBuf.String(), "critical err")
     assert.Contains(t, logBuf.String(), "an error")
-    assert.Contains(t, logBuf.String(), "information")
     assert.Contains(t, logBuf.String(), "a warning")
+    assert.NotContains(t, logBuf.String(), "information")
     assert.NotContains(t, logBuf.String(), "debugging info")
+    assert.NotContains(t, logBuf.String(), "trace")
+
+    assert.Contains(t, outputBuf.String(), "fatal err")
     assert.Contains(t, outputBuf.String(), "critical err")
     assert.Contains(t, outputBuf.String(), "an error")
-    assert.Contains(t, outputBuf.String(), "information")
     assert.NotContains(t, outputBuf.String(), "a warning")
+    assert.NotContains(t, outputBuf.String(), "information")
     assert.NotContains(t, outputBuf.String(), "debugging info")
+    assert.NotContains(t, outputBuf.String(), "trace")
 }

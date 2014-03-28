@@ -17,109 +17,124 @@ import (
 // debug and critical.
 type Level int
 
-//TRACE
-//DEBUG
-//INFO
-//WARN
-//ERROR
-//CRITICAL
-//FATAL
-
-type JWWLevel struct {
+type NotePad struct {
     Handle io.Writer
-    Level  int
-    *log.Logger
+    Level  Level
+    Prefix string
+    Logger **log.Logger
 }
 
+// Feedback is special. It writes plainly to the output while
+// logging with the standard extra information (date, file, etc)
+// Only Println and Printf are currently provided for this
 type Feedback struct{}
 
-// Log levels to control the logging output.
 const (
-    LevelDebug Level = iota
-    LevelWarn
+    LevelTrace Level = iota
+    LevelDebug
     LevelInfo
+    LevelWarn
     LevelError
     LevelCritical
+    LevelFatal
+    DefaultLogThreshold    = LevelWarn
+    DefaultOutputThreshold = LevelError
 )
 
 var (
-    DEBUG          *log.Logger
-    WARN           *log.Logger
-    INFO           *log.Logger
-    LOG            *log.Logger
-    ERROR          *log.Logger
-    CRITICAL       *log.Logger
-    FEEDBACK       Feedback
-    DebugHandle    io.Writer = os.Stdout
-    WarnHandle     io.Writer = os.Stdout
-    InfoHandle     io.Writer = os.Stdout
-    ErrorHandle    io.Writer = os.Stdout
-    CriticalHandle io.Writer = os.Stdout
-    logLevel       Level     = LevelWarn // 1
-    outLevel       Level     = LevelInfo // 2
-    LogHandle      io.Writer = ioutil.Discard
-    OutHandle      io.Writer = os.Stdout
-    BothHandle     io.Writer = io.MultiWriter(LogHandle, OutHandle)
+    TRACE      *log.Logger
+    DEBUG      *log.Logger
+    INFO       *log.Logger
+    WARN       *log.Logger
+    ERROR      *log.Logger
+    CRITICAL   *log.Logger
+    FATAL      *log.Logger
+    LOG        *log.Logger
+    FEEDBACK   Feedback
+    LogHandle  io.Writer  = ioutil.Discard
+    OutHandle  io.Writer  = os.Stdout
+    BothHandle io.Writer  = io.MultiWriter(LogHandle, OutHandle)
+    NotePads   []*NotePad = []*NotePad{trace, debug, info, warn, err, critical, fatal}
+
+    trace           *NotePad = &NotePad{Level: LevelTrace, Handle: os.Stdout, Logger: &TRACE, Prefix: "TRACE: "}
+    debug           *NotePad = &NotePad{Level: LevelDebug, Handle: os.Stdout, Logger: &DEBUG, Prefix: "DEBUG: "}
+    info            *NotePad = &NotePad{Level: LevelInfo, Handle: os.Stdout, Logger: &INFO, Prefix: "INFO: "}
+    warn            *NotePad = &NotePad{Level: LevelWarn, Handle: os.Stdout, Logger: &WARN, Prefix: "WARN: "}
+    err             *NotePad = &NotePad{Level: LevelError, Handle: os.Stdout, Logger: &ERROR, Prefix: "ERROR: "}
+    critical        *NotePad = &NotePad{Level: LevelCritical, Handle: os.Stdout, Logger: &CRITICAL, Prefix: "CRITICAL: "}
+    fatal           *NotePad = &NotePad{Level: LevelFatal, Handle: os.Stdout, Logger: &FATAL, Prefix: "FATAL: "}
+    logThreshold    Level    = DefaultLogThreshold
+    outputThreshold Level    = DefaultOutputThreshold
 )
 
 func init() {
-    SetOutLevel(LevelInfo)
+    SetOutputThreshold(DefaultOutputThreshold)
 }
 
+// Initialize will setup the jWalterWeatherman standard approach of providing the user
+// some feedback and logging a potentially different amount based on independent log and output thresholds.
+// By default the output has a lower threshold than logged
+// Don't use if you have manually set the Handles of the different levels as it will overwrite them.
 func Initialize() {
-    initWriters()
+    BothHandle = io.MultiWriter(LogHandle, OutHandle)
 
-    DEBUG = log.New(DebugHandle,
-        "DEBUG: ",
-        log.Ldate|log.Ltime|log.Lshortfile)
+    for _, n := range NotePads {
+        if n.Level < outputThreshold && n.Level < logThreshold {
+            n.Handle = ioutil.Discard
+        } else if n.Level >= outputThreshold && n.Level >= logThreshold {
+            n.Handle = BothHandle
+        } else if n.Level >= outputThreshold && n.Level < logThreshold {
+            n.Handle = OutHandle
+        } else {
+            n.Handle = LogHandle
+        }
+    }
 
-    INFO = log.New(InfoHandle,
-        "INFO:  ",
-        log.Ldate|log.Ltime|log.Lshortfile)
+    for _, n := range NotePads {
+        *n.Logger = log.New(n.Handle, n.Prefix, log.Ldate)
+    }
 
     LOG = log.New(LogHandle,
         "LOG:   ",
         log.Ldate|log.Ltime|log.Lshortfile)
-
-    WARN = log.New(WarnHandle,
-        "WARN:  ",
-        log.Ldate|log.Ltime|log.Lshortfile)
-
-    ERROR = log.New(ErrorHandle,
-        "ERROR: ",
-        log.Ldate|log.Ltime|log.Lshortfile)
-
-    CRITICAL = log.New(CriticalHandle,
-        "CRITICAL: ",
-        log.Ldate|log.Ltime|log.Lshortfile)
 }
 
-// Level returns the current log level.
-func LogLevel() Level {
-    return logLevel
+// Level returns the current global log threshold.
+func LogThreshold() Level {
+    return logThreshold
 }
 
-func OutLevel() Level {
-    return outLevel
+// Level returns the current global output threshold.
+func OutputThreshold() Level {
+    return outputThreshold
 }
 
+// Ensures that the level provided is within the bounds of available levels
 func levelCheck(level Level) Level {
     switch {
-    case level <= LevelDebug:
-        return LevelDebug
-    case level >= LevelCritical:
-        return LevelCritical
+    case level <= LevelTrace:
+        return LevelTrace
+    case level >= LevelFatal:
+        return LevelFatal
     default:
         return level
     }
 }
 
-// SetLevel switches to a new log level.
-func SetLogLevel(level Level) {
-    logLevel = levelCheck(level)
+// Establishes a threshold where anything matching or above will be logged
+func SetLogThreshold(level Level) {
+    logThreshold = levelCheck(level)
     Initialize()
 }
 
+// Establishes a threshold where anything matching or above will be output
+func SetOutputThreshold(level Level) {
+    outputThreshold = levelCheck(level)
+    Initialize()
+}
+
+// Conveniently Sets the Log Handle to a io.writer created for the file behind the given filepath
+// Will only append to this file
 func SetLogFile(path string) {
     file, err := os.OpenFile(path, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
     fmt.Println("Logging to", file.Name())
@@ -132,6 +147,7 @@ func SetLogFile(path string) {
     Initialize()
 }
 
+// Conveniently Creates a temporary file and sets the Log Handle to a io.writer created for it
 func UseTempLogFile(prefix string) {
     file, err := ioutil.TempFile(os.TempDir(), prefix)
     if err != nil {
@@ -144,80 +160,23 @@ func UseTempLogFile(prefix string) {
     Initialize()
 }
 
+// Disables logging for the entire JWW system
 func DiscardLogging() {
     LogHandle = ioutil.Discard
     Initialize()
 }
 
-func SetOutLevel(level Level) {
-    outLevel = levelCheck(level) // 1
-    Initialize()
-}
-
-// Don't use if you have manually set the Handles of the different levels as it will overwrite them.
-func initWriters() {
-    BothHandle = io.MultiWriter(LogHandle, OutHandle)
-    //DEBUG
-    if LevelDebug < outLevel && LevelDebug < logLevel {
-        DebugHandle = ioutil.Discard
-    } else if LevelDebug >= outLevel && LevelDebug >= logLevel {
-        DebugHandle = BothHandle
-    } else if LevelDebug >= outLevel && LevelDebug < logLevel {
-        DebugHandle = OutHandle
-    } else {
-        DebugHandle = LogHandle
-    }
-
-    //WARN
-    if LevelWarn < outLevel && LevelWarn < logLevel {
-        WarnHandle = ioutil.Discard
-    } else if LevelWarn >= outLevel && LevelWarn >= logLevel {
-        WarnHandle = BothHandle
-    } else if LevelWarn >= outLevel && LevelWarn < logLevel {
-        WarnHandle = OutHandle
-    } else {
-        WarnHandle = LogHandle
-    }
-
-    //INFO
-    if LevelInfo < outLevel && LevelInfo < logLevel {
-        InfoHandle = ioutil.Discard
-    } else if LevelInfo >= outLevel && LevelInfo >= logLevel {
-        InfoHandle = BothHandle
-    } else if LevelInfo >= outLevel && LevelInfo < logLevel {
-        InfoHandle = OutHandle
-    } else {
-        InfoHandle = LogHandle
-    }
-
-    //ERROR
-    if LevelError < outLevel && LevelError < logLevel {
-        ErrorHandle = ioutil.Discard
-    } else if LevelError >= outLevel && LevelError >= logLevel {
-        ErrorHandle = BothHandle
-    } else if LevelError >= outLevel && LevelError < logLevel {
-        ErrorHandle = OutHandle
-    } else {
-        ErrorHandle = LogHandle
-    }
-
-    //CRITICAL
-    if LevelCritical < outLevel && LevelCritical < logLevel {
-        CriticalHandle = ioutil.Discard
-    } else if LevelCritical >= outLevel && LevelCritical >= logLevel {
-        CriticalHandle = BothHandle
-    } else if LevelCritical >= outLevel && LevelCritical < logLevel {
-        CriticalHandle = OutHandle
-    } else {
-        CriticalHandle = LogHandle
-    }
-}
-
+// Feedback is special. It writes plainly to the output while
+// logging with the standard extra information (date, file, etc)
+// Only Println and Printf are currently provided for this
 func (fb *Feedback) Println(v ...interface{}) {
     fmt.Println(v...)
     LOG.Println(v...)
 }
 
+// Feedback is special. It writes plainly to the output while
+// logging with the standard extra information (date, file, etc)
+// Only Println and Printf are currently provided for this
 func (fb *Feedback) Printf(format string, v ...interface{}) {
     fmt.Printf(format, v...)
     LOG.Printf(format, v...)
