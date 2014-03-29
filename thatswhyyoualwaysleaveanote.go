@@ -38,7 +38,7 @@ const (
     LevelCritical
     LevelFatal
     DefaultLogThreshold    = LevelWarn
-    DefaultOutputThreshold = LevelError
+    DefaultStdoutThreshold = LevelError
 )
 
 var (
@@ -64,18 +64,18 @@ var (
     critical        *NotePad = &NotePad{Level: LevelCritical, Handle: os.Stdout, Logger: &CRITICAL, Prefix: "CRITICAL: "}
     fatal           *NotePad = &NotePad{Level: LevelFatal, Handle: os.Stdout, Logger: &FATAL, Prefix: "FATAL: "}
     logThreshold    Level    = DefaultLogThreshold
-    outputThreshold Level    = DefaultOutputThreshold
+    outputThreshold Level    = DefaultStdoutThreshold
 )
 
 func init() {
-    SetOutputThreshold(DefaultOutputThreshold)
+    SetStdoutThreshold(DefaultStdoutThreshold)
 }
 
-// Initialize will setup the jWalterWeatherman standard approach of providing the user
+// initialize will setup the jWalterWeatherman standard approach of providing the user
 // some feedback and logging a potentially different amount based on independent log and output thresholds.
 // By default the output has a lower threshold than logged
 // Don't use if you have manually set the Handles of the different levels as it will overwrite them.
-func Initialize() {
+func initialize() {
     BothHandle = io.MultiWriter(LogHandle, OutHandle)
 
     for _, n := range NotePads {
@@ -105,7 +105,7 @@ func LogThreshold() Level {
 }
 
 // Level returns the current global output threshold.
-func OutputThreshold() Level {
+func StdoutThreshold() Level {
     return outputThreshold
 }
 
@@ -124,13 +124,13 @@ func levelCheck(level Level) Level {
 // Establishes a threshold where anything matching or above will be logged
 func SetLogThreshold(level Level) {
     logThreshold = levelCheck(level)
-    Initialize()
+    initialize()
 }
 
 // Establishes a threshold where anything matching or above will be output
-func SetOutputThreshold(level Level) {
+func SetStdoutThreshold(level Level) {
     outputThreshold = levelCheck(level)
-    Initialize()
+    initialize()
 }
 
 // Conveniently Sets the Log Handle to a io.writer created for the file behind the given filepath
@@ -144,7 +144,7 @@ func SetLogFile(path string) {
     }
 
     LogHandle = file
-    Initialize()
+    initialize()
 }
 
 // Conveniently Creates a temporary file and sets the Log Handle to a io.writer created for it
@@ -157,13 +157,13 @@ func UseTempLogFile(prefix string) {
     fmt.Println("Logging to", file.Name())
 
     LogHandle = file
-    Initialize()
+    initialize()
 }
 
 // Disables logging for the entire JWW system
 func DiscardLogging() {
     LogHandle = ioutil.Discard
-    Initialize()
+    initialize()
 }
 
 // Feedback is special. It writes plainly to the output while

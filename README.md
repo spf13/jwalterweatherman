@@ -1,22 +1,29 @@
 jWalterWeatherman
 =================
 
-A simple printing and logging library for go
+Seamless printing to the terminal (stdout) and logging to a io.Writer
+(file) that’s as easy to use as fmt.Println.
 
 ![Always Leave A Note](http://spf13.github.com/jwalterweatherman/and_that__s_why_you_always_leave_a_note_by_jonnyetc-d57q7um.jpg)
 Graphic by [JonnyEtc](http://jonnyetc.deviantart.com/art/And-That-s-Why-You-Always-Leave-a-Note-315311422)
 
-JWW is primarily a convenience wrapper around the
-excellent standard log library.
+JWW is primarily a wrapper around the excellent standard log library. It
+provides a few advantages over using the standard log library alone.
+
+1. Ready to go out of the box. 
+2. One library for both printing to the terminal and logging (to files).
+3. Really easy to log to either a temp file or a file you specify.
+
 
 I really wanted a very straightforward library that could seamlessly do
 the following things.
 
 1. Replace all the println, printf, etc statements thought my code with
    something more useful
-2. Allow the user to easily control what levels are printed
+2. Allow the user to easily control what levels are printed to stdout
 3. Allow the user to easily control what levels are logged
-4. Provide good feedback (which can easily be logged) to the user
+4. Provide an easy mechanism (like fmt.Println) to print info to the user
+   which can be easily logged as well 
 5. Due to 2 & 3 provide easy verbose mode for output and logs
 6. Not have any unnecessary initialization cruft. Just use it.
 
@@ -24,6 +31,7 @@ the following things.
 
 ## Step 1. Use it
 Put calls throughout your source based on type of feedback.
+No initialization or setup needs to happen. Just start calling things.
 
 Available Loggers are:
 
@@ -46,22 +54,45 @@ standard usage. Eg..
     ...
 
     if err != nil {
+
+        // This is a pretty serious error and the user should know about
+        // it. It will be printed to the terminal as well as logged under the
+        // default thresholds.
+
         jww.ERROR.Println(err)
     }
 
-    // this isn’t that important, but they may want to know
+    if err2 != nil {
+        // This error isn’t going to materially change the behavior of the
+        // application, but it’s something that may not be what the user
+        // expects. Under the default thresholds, Warn will be logged, but
+        // not printed to the terminal. 
+
+        jww.WARN.Println(err2)
+    }
+
+    // Information that’s relevant to what’s happening, but not very
+    // important for the user. Under the default thresholds this will be
+    // discarded.
+
     jww.INFO.Printf("information %q", response)
 
 ```
 
+_Why 7 levels?_
 
-## Step 2. Optionally configure it
+Maybe you think that 7 levels are too much for any application... and you
+are probably correct. Just because there are seven levels doesn’t mean
+that you should be using all 7 levels. Pick the right set for your needs.
+Remember they only have to mean something to your project.
 
-By default:
+## Step 2. Optionally configure JWW
+
+Under the default thresholds :
+
  * Debug, Trace & Info goto /dev/null
  * Warn and above is logged (when a log file/io.Writer is provided)
  * Error and above is printed to the terminal (stdout)
-
 
 ### Changing the thresholds
 
@@ -80,7 +111,7 @@ verbosity.
 
     if Verbose {
         jww.SetLogThreshold(jww.LevelTrace)
-        jww.SetOutputThreshold(jww.LevelInfo)
+        jww.SetStdoutThreshold(jww.LevelInfo)
     }
 ```
 
@@ -89,6 +120,8 @@ verbosity.
 JWW conveniently creates a temporary file and sets the log Handle to
 a io.Writer created for it. You should call this early in your application
 initialization routine as it will only log calls made after it is executed. 
+When this option is used, the library will fmt.Println where to find the
+log file.
 
 ```go
     import (

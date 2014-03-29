@@ -12,13 +12,13 @@ import (
 )
 
 func TestLevels(t *testing.T) {
-    SetOutputThreshold(LevelError)
-    assert.Equal(t, OutputThreshold(), LevelError)
+    SetStdoutThreshold(LevelError)
+    assert.Equal(t, StdoutThreshold(), LevelError)
     SetLogThreshold(LevelCritical)
     assert.Equal(t, LogThreshold(), LevelCritical)
-    assert.NotEqual(t, OutputThreshold(), LevelCritical)
-    SetOutputThreshold(LevelWarn)
-    assert.Equal(t, OutputThreshold(), LevelWarn)
+    assert.NotEqual(t, StdoutThreshold(), LevelCritical)
+    SetStdoutThreshold(LevelWarn)
+    assert.Equal(t, StdoutThreshold(), LevelWarn)
 }
 
 func TestDefaultLogging(t *testing.T) {
@@ -28,7 +28,7 @@ func TestDefaultLogging(t *testing.T) {
     OutHandle = outputBuf
 
     SetLogThreshold(LevelWarn)
-    SetOutputThreshold(LevelError)
+    SetStdoutThreshold(LevelError)
 
     FATAL.Println("fatal err")
     CRITICAL.Println("critical err")
