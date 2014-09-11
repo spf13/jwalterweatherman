@@ -137,11 +137,11 @@ func SetStdoutThreshold(level Level) {
 // Will only append to this file
 func SetLogFile(path string) {
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
-	fmt.Println("Logging to", file.Name())
 	if err != nil {
 		CRITICAL.Println("Failed to open log file:", path, err)
 		os.Exit(-1)
 	}
+        fmt.Println("Logging to", file.Name())
 
 	LogHandle = file
 	initialize()
