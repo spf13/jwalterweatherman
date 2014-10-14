@@ -7,6 +7,7 @@ import (
 	"os"
 )
 
+// Notepad is where you leave a note !
 type Notepad struct {
 	TRACE      *log.Logger
 	DEBUG      *log.Logger
@@ -24,6 +25,7 @@ type Notepad struct {
 	flags      int
 }
 
+// NewNotepad create a new notepad.
 func NewNotepad(stdoutThreshold Threshold, logThreshold Threshold, logHandle io.Writer, prefix string, flags int) *Notepad {
 	n := &Notepad{}
 	
@@ -45,6 +47,7 @@ func NewNotepad(stdoutThreshold Threshold, logThreshold Threshold, logHandle io.
 	return n
 }
 
+// init create the loggers for each level depending on the notepad thresholds
 func (n *Notepad) init () {
 	bothHandle := io.MultiWriter(os.Stdout, n.logHandle)
 	
@@ -66,21 +69,28 @@ func (n *Notepad) init () {
 	}
 }
 
+// SetLogThreshold change the threshold above which messages are written to the
+// log file
 func (n *Notepad) SetLogThreshold (threshold Threshold) {
 	n.logThreshold = threshold
 	n.init()
 }
 
+// SetLogOutput change the file where log messages are written
 func (n *Notepad) SetLogOutput (handle io.Writer) {
 	n.logHandle = handle
 	n.init()
 }
 
+// SetStdoutThreshold change the threshold above which messages are written to the
+// standard output
 func (n *Notepad) SetStdoutThreshold (threshold Threshold) {
 	n.stdoutThreshold = threshold
 	n.init()
 }
 
+// SetPrefix change the prefix used by the notepad. Prefixes are displayed between 
+// brackets at the begining of the line. An empty prefix won't be displayed at all.
 func (n *Notepad) SetPrefix (prefix string) {
 	if len(prefix) != 0 {
 		n.prefix = "["+prefix+"] "
@@ -90,6 +100,8 @@ func (n *Notepad) SetPrefix (prefix string) {
 	n.init()
 }
 
+// SetFlags choose which flags the logger will display (after prefix and message
+// level). See the package log for more informations on this.
 func (n *Notepad) SetFlags (flags int) {
 	n.flags = flags
 	n.init()
