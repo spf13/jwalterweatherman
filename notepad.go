@@ -52,16 +52,16 @@ func (n *Notepad) init () {
 		threshold := Threshold(t)
 		switch {
 			case threshold >= n.logThreshold && threshold >= n.stdoutThreshold:
-				*logger = log.New(bothHandle, n.prefix + thresholdPrefixes[threshold], n.flags)
+				*logger = log.New(bothHandle, n.prefix + prefixes[threshold], n.flags)
 				
 			case threshold >= n.logThreshold:
-				*logger = log.New(n.logHandle, n.prefix + thresholdPrefixes[threshold], n.flags)
+				*logger = log.New(n.logHandle, n.prefix + prefixes[threshold], n.flags)
 				
 			case threshold >= n.stdoutThreshold:
-				*logger = log.New(os.Stdout, n.prefix + thresholdPrefixes[threshold], n.flags)
+				*logger = log.New(os.Stdout, n.prefix + prefixes[threshold], n.flags)
 				
 			default:
-				*logger = log.New(ioutil.Discard, n.prefix + thresholdPrefixes[threshold], n.flags)
+				*logger = log.New(ioutil.Discard, n.prefix + prefixes[threshold], n.flags)
 		}
 	}
 }

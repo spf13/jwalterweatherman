@@ -18,11 +18,6 @@ var (
 	defaultNotepad *Notepad
 )
 
-func init () {
-	defaultNotepad = NewNotepad(ThresholdInfo, ThresholdTrace, ioutil.Discard, "", log.Ldate | log.Ltime)
-	reloadDefaultNotepad()
-}
-
 func reloadDefaultNotepad () {
 	TRACE = defaultNotepad.TRACE
 	DEBUG = defaultNotepad.DEBUG
@@ -31,6 +26,11 @@ func reloadDefaultNotepad () {
 	ERROR = defaultNotepad.ERROR
 	CRITICAL = defaultNotepad.CRITICAL
 	FATAL = defaultNotepad.FATAL
+}
+
+func init () {
+	defaultNotepad = NewNotepad(Info, Trace, ioutil.Discard, "", log.Ldate | log.Ltime)
+	reloadDefaultNotepad()
 }
 
 func SetLogThreshold (threshold Threshold) {
