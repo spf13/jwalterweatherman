@@ -13,11 +13,11 @@ const (
 )
 
 var prefixes map[Threshold]string = map[Threshold]string{
-	Trace: "TRACE ",
-	Debug: "DEBUG ",
-	Info: "INFO ",
-	Warn: "WARN ",
-	Error: "ERROR ",
+	Trace:    "TRACE ",
+	Debug:    "DEBUG ",
+	Info:     "INFO ",
+	Warn:     "WARN ",
+	Error:    "ERROR ",
 	Critical: "CRITICAL ",
-	Fatal: "FATAL ",
+	Fatal:    "FATAL ",
 }

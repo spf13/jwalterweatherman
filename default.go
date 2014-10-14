@@ -7,18 +7,18 @@ import (
 )
 
 var (
-	TRACE      *log.Logger
-	DEBUG      *log.Logger
-	INFO       *log.Logger
-	WARN       *log.Logger
-	ERROR      *log.Logger
-	CRITICAL   *log.Logger
-	FATAL      *log.Logger
-	
+	TRACE    *log.Logger
+	DEBUG    *log.Logger
+	INFO     *log.Logger
+	WARN     *log.Logger
+	ERROR    *log.Logger
+	CRITICAL *log.Logger
+	FATAL    *log.Logger
+
 	defaultNotepad *Notepad
 )
 
-func reloadDefaultNotepad () {
+func reloadDefaultNotepad() {
 	TRACE = defaultNotepad.TRACE
 	DEBUG = defaultNotepad.DEBUG
 	INFO = defaultNotepad.INFO
@@ -28,38 +28,38 @@ func reloadDefaultNotepad () {
 	FATAL = defaultNotepad.FATAL
 }
 
-func init () {
-	defaultNotepad = NewNotepad(Info, Trace, ioutil.Discard, "", log.Ldate | log.Ltime)
+func init() {
+	defaultNotepad = NewNotepad(Info, Trace, ioutil.Discard, "", log.Ldate|log.Ltime)
 	reloadDefaultNotepad()
 }
 
 // SetLogThreshold set the log threshold for the default notepad. Trace by default.
-func SetLogThreshold (threshold Threshold) {
+func SetLogThreshold(threshold Threshold) {
 	defaultNotepad.SetLogThreshold(threshold)
 	reloadDefaultNotepad()
 }
 
 // SetLogOutput set the log output for the default notepad. Discarded by default.
-func SetLogOutput (handle io.Writer) {
+func SetLogOutput(handle io.Writer) {
 	defaultNotepad.SetLogOutput(handle)
 	reloadDefaultNotepad()
 }
 
 // SetStdoutThreshold set the standard output threshold for the default notepad.
 // Info by default.
-func SetStdoutThreshold (threshold Threshold) {
+func SetStdoutThreshold(threshold Threshold) {
 	defaultNotepad.SetStdoutThreshold(threshold)
 	reloadDefaultNotepad()
 }
 
 // SetPrefix set the prefix for the default notepad. Empty by default.
-func SetPrefix (prefix string) {
+func SetPrefix(prefix string) {
 	defaultNotepad.SetPrefix(prefix)
 	reloadDefaultNotepad()
 }
 
 // SetFlags set the flags for the default notepad. "log.Ldate | log.Ltime" by default.
-func SetFlags (flags int) {
+func SetFlags(flags int) {
 	defaultNotepad.SetFlags(flags)
 	reloadDefaultNotepad()
 }
