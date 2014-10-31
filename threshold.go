@@ -3,21 +3,21 @@ package jww
 type Threshold int
 
 const (
-	Trace Threshold = iota
-	Debug
-	Info
-	Warn
-	Error
-	Critical
-	Fatal
+	LevelTrace Threshold = iota
+	LevelDebug
+	LevelInfo
+	LevelWarn
+	LevelError
+	LevelCritical
+	LevelFatal
 )
 
 var prefixes map[Threshold]string = map[Threshold]string{
-	Trace:    "TRACE ",
-	Debug:    "DEBUG ",
-	Info:     "INFO ",
-	Warn:     "WARN ",
-	Error:    "ERROR ",
-	Critical: "CRITICAL ",
-	Fatal:    "FATAL ",
+	LevelTrace:    "TRACE ",
+	LevelDebug:    "DEBUG ",
+	LevelInfo:     "INFO ",
+	LevelWarn:     "WARN ",
+	LevelError:    "ERROR ",
+	LevelCritical: "CRITICAL ",
+	LevelFatal:    "FATAL ",
 }
