@@ -65,6 +65,13 @@ var (
 	fatal           *NotePad = &NotePad{Level: LevelFatal, Handle: os.Stdout, Logger: &FATAL, Prefix: "FATAL: "}
 	logThreshold    Level    = DefaultLogThreshold
 	outputThreshold Level    = DefaultStdoutThreshold
+
+	DATE     = log.Ldate
+	TIME     = log.Ltime
+	SFILE    = log.Lshortfile
+	LFILE    = log.Llongfile
+	MSEC     = log.Lmicroseconds
+	logFlags = DATE | TIME | SFILE
 )
 
 func init() {
@@ -91,12 +98,17 @@ func initialize() {
 	}
 
 	for _, n := range NotePads {
-		*n.Logger = log.New(n.Handle, n.Prefix, log.Ldate)
+		*n.Logger = log.New(n.Handle, n.Prefix, logFlags)
 	}
 
 	LOG = log.New(LogHandle,
 		"LOG:   ",
-		log.Ldate|log.Ltime|log.Lshortfile)
+		logFlags)
+}
+
+// Set the log Flags (Available flag: DATE, TIME, SFILE, LFILE and MSEC)
+func SetLogFlag(flags int) {
+	logFlags = flags
 }
 
 // Level returns the current global log threshold.
@@ -141,7 +153,7 @@ func SetLogFile(path string) {
 		CRITICAL.Println("Failed to open log file:", path, err)
 		os.Exit(-1)
 	}
-        fmt.Println("Logging to", file.Name())
+	fmt.Println("Logging to", file.Name())
 
 	LogHandle = file
 	initialize()
