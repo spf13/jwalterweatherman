@@ -115,6 +115,9 @@ verbosity.
     }
 ```
 
+Note that JWW's own internal output uses log levels as well, so set the log
+level before making any other calls if you want to see what it's up to.
+
 ### Using a temp log file
 
 JWW conveniently creates a temporary file and sets the log Handle to
