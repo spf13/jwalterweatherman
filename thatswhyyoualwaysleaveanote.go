@@ -171,14 +171,16 @@ func DiscardLogging() {
 // logging with the standard extra information (date, file, etc)
 // Only Println and Printf are currently provided for this
 func (fb *Feedback) Println(v ...interface{}) {
-	fmt.Println(v...)
-	LOG.Println(v...)
+	s := fmt.Sprintln(v...)
+	fmt.Print(s)
+	LOG.Output(2, s)
 }
 
 // Feedback is special. It writes plainly to the output while
 // logging with the standard extra information (date, file, etc)
 // Only Println and Printf are currently provided for this
 func (fb *Feedback) Printf(format string, v ...interface{}) {
-	fmt.Printf(format, v...)
-	LOG.Printf(format, v...)
+	s := fmt.Sprintf(format, v...)
+	fmt.Print(s)
+	LOG.Output(2, s)
 }
