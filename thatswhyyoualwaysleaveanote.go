@@ -65,14 +65,17 @@ var (
 	fatal           *NotePad = &NotePad{Level: LevelFatal, Handle: os.Stdout, Logger: &FATAL, Prefix: "FATAL: "}
 	logThreshold    Level    = DefaultLogThreshold
 	outputThreshold Level    = DefaultStdoutThreshold
-
-	DATE     = log.Ldate
-	TIME     = log.Ltime
-	SFILE    = log.Lshortfile
-	LFILE    = log.Llongfile
-	MSEC     = log.Lmicroseconds
-	logFlags = DATE | TIME | SFILE
 )
+
+const (
+	DATE  = log.Ldate
+	TIME  = log.Ltime
+	SFILE = log.Lshortfile
+	LFILE = log.Llongfile
+	MSEC  = log.Lmicroseconds
+)
+
+var logFlags = DATE | TIME | SFILE
 
 func init() {
 	SetStdoutThreshold(DefaultStdoutThreshold)
