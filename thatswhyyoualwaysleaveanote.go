@@ -109,6 +109,7 @@ func initialize() {
 // Set the log Flags (Available flag: DATE, TIME, SFILE, LFILE and MSEC)
 func SetLogFlag(flags int) {
 	logFlags = flags
+	initialize()
 }
 
 // Level returns the current global log threshold.
