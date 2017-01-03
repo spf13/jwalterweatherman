@@ -101,7 +101,7 @@ func (n *Notepad) init() {
 
 	for t, logger := range n.loggers {
 		threshold := Threshold(t)
-		counter := &logCounter{id: t}
+		counter := &logCounter{}
 		n.logCounters[t] = counter
 
 		switch {

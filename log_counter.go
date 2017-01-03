@@ -10,7 +10,6 @@ import (
 )
 
 type logCounter struct {
-	id      int
 	counter uint64
 }
 
