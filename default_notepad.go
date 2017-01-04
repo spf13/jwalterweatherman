@@ -41,7 +41,7 @@ func reloadDefaultNotepad() {
 }
 
 func init() {
-	defaultNotepad = NewNotepad(LevelInfo, LevelTrace, os.Stdout, ioutil.Discard, "", log.Ldate|log.Ltime)
+	defaultNotepad = NewNotepad(LevelError, LevelWarn, os.Stdout, ioutil.Discard, "", log.Ldate|log.Ltime)
 	reloadDefaultNotepad()
 }
 
