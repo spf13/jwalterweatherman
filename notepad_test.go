@@ -31,3 +31,8 @@ func TestNotepad(t *testing.T) {
 	require.Equal(t, n.LogCountForLevel(LevelDebug), uint64(1))
 	require.Equal(t, n.LogCountForLevel(LevelTrace), uint64(0))
 }
+
+func TestThresholdString(t *testing.T) {
+	require.Equal(t, LevelError.String(), "ERROR")
+	require.Equal(t, LevelTrace.String(), "TRACE")
+}
