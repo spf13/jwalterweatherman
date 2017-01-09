@@ -18,6 +18,9 @@ func TestNotepad(t *testing.T) {
 
 	n := NewNotepad(LevelCritical, LevelError, &outHandle, &logHandle, "TestNotePad", 0)
 
+	require.Equal(t, LevelCritical, n.GetStdoutThreshold())
+	require.Equal(t, LevelError, n.GetLogThreshold())
+
 	n.DEBUG.Println("Some debug")
 	n.ERROR.Println("Some error")
 	n.CRITICAL.Println("Some critical error")

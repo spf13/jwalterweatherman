@@ -141,11 +141,21 @@ func (n *Notepad) SetLogOutput(handle io.Writer) {
 	n.init()
 }
 
+// GetStdoutThreshold returns the defined Treshold for the log logger.
+func (n *Notepad) GetLogThreshold() Threshold {
+	return n.logThreshold
+}
+
 // SetStdoutThreshold change the threshold above which messages are written to the
 // standard output
 func (n *Notepad) SetStdoutThreshold(threshold Threshold) {
 	n.stdoutThreshold = threshold
 	n.init()
+}
+
+// GetStdoutThreshold returns the Treshold for the stdout logger.
+func (n *Notepad) GetStdoutThreshold() Threshold {
+	return n.stdoutThreshold
 }
 
 // SetPrefix change the prefix used by the notepad. Prefixes are displayed between
