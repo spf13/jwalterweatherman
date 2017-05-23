@@ -72,10 +72,10 @@ func NewNotepad(outThreshold Threshold, logThreshold Threshold, outHandle, logHa
 	n := &Notepad{}
 
 	n.loggers = append(n.loggers, &n.TRACE, &n.DEBUG, &n.INFO, &n.WARN, &n.ERROR, &n.CRITICAL, &n.FATAL)
-	n.logHandle = logHandle
 	n.outHandle = outHandle
-	n.logThreshold = logThreshold
+	n.logHandle = logHandle
 	n.stdoutThreshold = outThreshold
+	n.logThreshold = logThreshold
 
 	if len(prefix) != 0 {
 		n.prefix = "[" + prefix + "] "
@@ -88,15 +88,13 @@ func NewNotepad(outThreshold Threshold, logThreshold Threshold, outHandle, logHa
 	n.LOG = log.New(n.logHandle,
 		"LOG:   ",
 		n.flags)
-
-	n.FEEDBACK = &Feedback{n}
+	n.FEEDBACK = &Feedback{out: log.New(outHandle, "", 0), log: n.LOG}
 
 	n.init()
-
 	return n
 }
 
-// init create the loggers for each level depending on the notepad thresholds
+// init creates the loggers for each level depending on the notepad thresholds.
 func (n *Notepad) init() {
 	bothHandle := io.MultiWriter(n.outHandle, n.logHandle)
 
@@ -169,26 +167,30 @@ func (n *Notepad) SetFlags(flags int) {
 	n.init()
 }
 
-// Feedback is special. It writes plainly to the output while
+// Feedback writes plainly to the outHandle while
 // logging with the standard extra information (date, file, etc).
 type Feedback struct {
-	*Notepad
+	out *log.Logger
+	log *log.Logger
 }
 
 func (fb *Feedback) Println(v ...interface{}) {
-	s := fmt.Sprintln(v...)
-	fmt.Print(s)
-	fb.LOG.Output(2, s)
+	fb.output(fmt.Sprintln(v...))
 }
 
 func (fb *Feedback) Printf(format string, v ...interface{}) {
-	s := fmt.Sprintf(format, v...)
-	fmt.Print(s)
-	fb.LOG.Output(2, s)
+	fb.output(fmt.Sprintf(format, v...))
 }
 
 func (fb *Feedback) Print(v ...interface{}) {
-	s := fmt.Sprint(v...)
-	fmt.Print(s)
-	fb.LOG.Output(2, s)
+	fb.output(fmt.Sprint(v...))
+}
+
+func (fb *Feedback) output(s string) {
+	if fb.out != nil {
+		fb.out.Output(2, s)
+	}
+	if fb.log != nil {
+		fb.log.Output(2, s)
+	}
 }
