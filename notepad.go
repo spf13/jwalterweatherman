@@ -38,11 +38,7 @@ var prefixes map[Threshold]string = map[Threshold]string{
 	LevelFatal:    "FATAL",
 }
 
-func prefix(t Threshold) string {
-	return t.String() + " "
-}
-
-// Notepad is where you leave a note !
+// Notepad is where you leave a note!
 type Notepad struct {
 	TRACE    *log.Logger
 	DEBUG    *log.Logger
@@ -102,31 +98,32 @@ func (n *Notepad) init() {
 		threshold := Threshold(t)
 		counter := &logCounter{}
 		n.logCounters[t] = counter
+		prefix := n.prefix + threshold.String() + " "
 
 		switch {
 		case threshold >= n.logThreshold && threshold >= n.stdoutThreshold:
-			*logger = log.New(io.MultiWriter(counter, bothHandle), n.prefix+prefix(threshold), n.flags)
+			*logger = log.New(io.MultiWriter(counter, bothHandle), prefix, n.flags)
 
 		case threshold >= n.logThreshold:
-			*logger = log.New(io.MultiWriter(counter, n.logHandle), n.prefix+prefix(threshold), n.flags)
+			*logger = log.New(io.MultiWriter(counter, n.logHandle), prefix, n.flags)
 
 		case threshold >= n.stdoutThreshold:
-			*logger = log.New(io.MultiWriter(counter, os.Stdout), n.prefix+prefix(threshold), n.flags)
+			*logger = log.New(io.MultiWriter(counter, os.Stdout), prefix, n.flags)
 
 		default:
-			*logger = log.New(counter, n.prefix+prefix(threshold), n.flags)
+			*logger = log.New(counter, prefix, n.flags)
 		}
 	}
 }
 
-// SetLogThreshold change the threshold above which messages are written to the
+// SetLogThreshold changes the threshold above which messages are written to the
 // log file
 func (n *Notepad) SetLogThreshold(threshold Threshold) {
 	n.logThreshold = threshold
 	n.init()
 }
 
-// SetLogOutput change the file where log messages are written
+// SetLogOutput changes the file where log messages are written
 func (n *Notepad) SetLogOutput(handle io.Writer) {
 	n.logHandle = handle
 	n.init()
