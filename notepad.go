@@ -117,13 +117,13 @@ func (n *Notepad) init() {
 }
 
 // SetLogThreshold changes the threshold above which messages are written to the
-// log file
+// log file.
 func (n *Notepad) SetLogThreshold(threshold Threshold) {
 	n.logThreshold = threshold
 	n.init()
 }
 
-// SetLogOutput changes the file where log messages are written
+// SetLogOutput changes the file where log messages are written.
 func (n *Notepad) SetLogOutput(handle io.Writer) {
 	n.logHandle = handle
 	n.init()
@@ -134,8 +134,8 @@ func (n *Notepad) GetLogThreshold() Threshold {
 	return n.logThreshold
 }
 
-// SetStdoutThreshold change the threshold above which messages are written to the
-// standard output
+// SetStdoutThreshold changes the threshold above which messages are written to the
+// standard output.
 func (n *Notepad) SetStdoutThreshold(threshold Threshold) {
 	n.stdoutThreshold = threshold
 	n.init()
@@ -146,7 +146,7 @@ func (n *Notepad) GetStdoutThreshold() Threshold {
 	return n.stdoutThreshold
 }
 
-// SetPrefix change the prefix used by the notepad. Prefixes are displayed between
+// SetPrefix changes the prefix used by the notepad. Prefixes are displayed between
 // brackets at the begining of the line. An empty prefix won't be displayed at all.
 func (n *Notepad) SetPrefix(prefix string) {
 	if len(prefix) != 0 {
