@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 )
 
 type Threshold int
@@ -92,7 +91,7 @@ func NewNotepad(outThreshold Threshold, logThreshold Threshold, outHandle, logHa
 
 // init creates the loggers for each level depending on the notepad thresholds.
 func (n *Notepad) init() {
-	bothHandle := io.MultiWriter(n.outHandle, n.logHandle)
+	logAndOut := io.MultiWriter(n.outHandle, n.logHandle)
 
 	for t, logger := range n.loggers {
 		threshold := Threshold(t)
@@ -102,13 +101,13 @@ func (n *Notepad) init() {
 
 		switch {
 		case threshold >= n.logThreshold && threshold >= n.stdoutThreshold:
-			*logger = log.New(io.MultiWriter(counter, bothHandle), prefix, n.flags)
+			*logger = log.New(io.MultiWriter(counter, logAndOut), prefix, n.flags)
 
 		case threshold >= n.logThreshold:
 			*logger = log.New(io.MultiWriter(counter, n.logHandle), prefix, n.flags)
 
 		case threshold >= n.stdoutThreshold:
-			*logger = log.New(io.MultiWriter(counter, os.Stdout), prefix, n.flags)
+			*logger = log.New(io.MultiWriter(counter, n.outHandle), prefix, n.flags)
 
 		default:
 			*logger = log.New(counter, prefix, n.flags)
