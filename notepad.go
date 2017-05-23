@@ -110,7 +110,9 @@ func (n *Notepad) init() {
 			*logger = log.New(io.MultiWriter(counter, n.outHandle), prefix, n.flags)
 
 		default:
-			*logger = log.New(counter, prefix, n.flags)
+			// counter doesn't care about prefix and flags, so don't use them
+			// for performance.
+			*logger = log.New(counter, "", 0)
 		}
 	}
 }
