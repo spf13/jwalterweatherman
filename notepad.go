@@ -51,7 +51,7 @@ type Notepad struct {
 	LOG      *log.Logger
 	FEEDBACK *Feedback
 
-	loggers         []**log.Logger
+	loggers         [7]**log.Logger
 	logHandle       io.Writer
 	outHandle       io.Writer
 	logThreshold    Threshold
@@ -67,7 +67,7 @@ type Notepad struct {
 func NewNotepad(outThreshold Threshold, logThreshold Threshold, outHandle, logHandle io.Writer, prefix string, flags int) *Notepad {
 	n := &Notepad{}
 
-	n.loggers = append(n.loggers, &n.TRACE, &n.DEBUG, &n.INFO, &n.WARN, &n.ERROR, &n.CRITICAL, &n.FATAL)
+	n.loggers = [7]**log.Logger{&n.TRACE, &n.DEBUG, &n.INFO, &n.WARN, &n.ERROR, &n.CRITICAL, &n.FATAL}
 	n.outHandle = outHandle
 	n.logHandle = logHandle
 	n.stdoutThreshold = outThreshold
