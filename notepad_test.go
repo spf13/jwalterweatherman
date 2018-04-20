@@ -13,9 +13,9 @@ import (
 )
 
 func TestNotepad(t *testing.T) {
-	var logHandle, outHandle bytes.Buffer
+	var logHandle, outHandle, errHandle bytes.Buffer
 
-	n := NewNotepad(LevelCritical, LevelError, &outHandle, &logHandle, "TestNotePad", 0)
+	n := newNotepad(LevelCritical, LevelError, LevelError, &outHandle, &errHandle, &logHandle, "TestNotePad", 0)
 
 	require.Equal(t, LevelCritical, n.GetStdoutThreshold())
 	require.Equal(t, LevelError, n.GetLogThreshold())
@@ -28,6 +28,7 @@ func TestNotepad(t *testing.T) {
 	require.NotContains(t, logHandle.String(), "Some debug")
 	require.NotContains(t, outHandle.String(), "Some error")
 	require.Contains(t, outHandle.String(), "Some critical error")
+	require.Contains(t, errHandle.String(), "Some critical error")
 
 	require.Equal(t, n.LogCountForLevel(LevelError), uint64(1))
 	require.Equal(t, n.LogCountForLevel(LevelDebug), uint64(1))
