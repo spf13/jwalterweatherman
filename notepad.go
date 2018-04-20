@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 )
 
 type Threshold int
@@ -53,8 +54,10 @@ type Notepad struct {
 	loggers         [7]**log.Logger
 	logHandle       io.Writer
 	outHandle       io.Writer
+	errHandle       io.Writer
 	logThreshold    Threshold
 	stdoutThreshold Threshold
+	stderrThreshold Threshold
 	prefix          string
 	flags           int
 
@@ -64,12 +67,18 @@ type Notepad struct {
 
 // NewNotepad create a new notepad.
 func NewNotepad(outThreshold Threshold, logThreshold Threshold, outHandle, logHandle io.Writer, prefix string, flags int) *Notepad {
+	return newNotepad(outThreshold, LevelError, logThreshold, outHandle, os.Stderr, logHandle, prefix, flags)
+}
+
+func newNotepad(outThreshold, errThreshold, logThreshold Threshold, outHandle, errHandle, logHandle io.Writer, prefix string, flags int) *Notepad {
 	n := &Notepad{}
 
 	n.loggers = [7]**log.Logger{&n.TRACE, &n.DEBUG, &n.INFO, &n.WARN, &n.ERROR, &n.CRITICAL, &n.FATAL}
 	n.outHandle = outHandle
+	n.errHandle = errHandle
 	n.logHandle = logHandle
 	n.stdoutThreshold = outThreshold
+	n.stderrThreshold = errThreshold
 	n.logThreshold = logThreshold
 
 	if len(prefix) != 0 {
@@ -91,7 +100,8 @@ func NewNotepad(outThreshold Threshold, logThreshold Threshold, outHandle, logHa
 
 // init creates the loggers for each level depending on the notepad thresholds.
 func (n *Notepad) init() {
-	logAndOut := io.MultiWriter(n.outHandle, n.logHandle)
+	thresholds := []Threshold{n.stdoutThreshold, n.stderrThreshold, n.logThreshold}
+	availableWriters := []io.Writer{n.outHandle, n.errHandle, n.logHandle}
 
 	for t, logger := range n.loggers {
 		threshold := Threshold(t)
@@ -99,19 +109,16 @@ func (n *Notepad) init() {
 		n.logCounters[t] = counter
 		prefix := n.prefix + threshold.String() + " "
 
-		switch {
-		case threshold >= n.logThreshold && threshold >= n.stdoutThreshold:
-			*logger = log.New(io.MultiWriter(counter, logAndOut), prefix, n.flags)
+		writers := []io.Writer{counter}
+		for index, thresholdToCompare := range thresholds {
+			if threshold >= thresholdToCompare {
+				writers = append(writers, availableWriters[index])
+			}
+		}
 
-		case threshold >= n.logThreshold:
-			*logger = log.New(io.MultiWriter(counter, n.logHandle), prefix, n.flags)
-
-		case threshold >= n.stdoutThreshold:
-			*logger = log.New(io.MultiWriter(counter, n.outHandle), prefix, n.flags)
-
-		default:
-			// counter doesn't care about prefix and flags, so don't use them
-			// for performance.
+		if len(writers) > 1 {
+			*logger = log.New(io.MultiWriter(writers...), prefix, n.flags)
+		} else {
 			*logger = log.New(counter, "", 0)
 		}
 	}
@@ -145,6 +152,18 @@ func (n *Notepad) SetStdoutThreshold(threshold Threshold) {
 // GetStdoutThreshold returns the Treshold for the stdout logger.
 func (n *Notepad) GetStdoutThreshold() Threshold {
 	return n.stdoutThreshold
+}
+
+// SetStderrThreshold changes the threshold above which messages are written to the
+// standard err.
+func (n *Notepad) SetStderrThreshold(threshold Threshold) {
+	n.stderrThreshold = threshold
+	n.init()
+}
+
+// GetStderrThreshold returns the Treshold for the stderr logger.
+func (n *Notepad) GetStderrThreshold() Threshold {
+	return n.stderrThreshold
 }
 
 // SetPrefix changes the prefix used by the notepad. Prefixes are displayed between
