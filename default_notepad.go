@@ -76,6 +76,13 @@ func SetFlags(flags int) {
 	reloadDefaultNotepad()
 }
 
+// SetLogListeners configures the default logger with one or more log listeners.
+func SetLogListeners(l ...LogListener) {
+	defaultNotepad.logListeners = l
+	defaultNotepad.init()
+	reloadDefaultNotepad()
+}
+
 // Level returns the current global log threshold.
 func LogThreshold() Threshold {
 	return defaultNotepad.logThreshold
@@ -94,20 +101,4 @@ func GetLogThreshold() Threshold {
 // GetStdoutThreshold returns the Treshold for the stdout logger.
 func GetStdoutThreshold() Threshold {
 	return defaultNotepad.GetStdoutThreshold()
-}
-
-// LogCountForLevel returns the number of log invocations for a given threshold.
-func LogCountForLevel(l Threshold) uint64 {
-	return defaultNotepad.LogCountForLevel(l)
-}
-
-// LogCountForLevelsGreaterThanorEqualTo returns the number of log invocations
-// greater than or equal to a given threshold.
-func LogCountForLevelsGreaterThanorEqualTo(threshold Threshold) uint64 {
-	return defaultNotepad.LogCountForLevelsGreaterThanorEqualTo(threshold)
-}
-
-// ResetLogCounters resets the invocation counters for all levels.
-func ResetLogCounters() {
-	defaultNotepad.ResetLogCounters()
 }
