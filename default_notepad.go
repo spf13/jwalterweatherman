@@ -64,6 +64,13 @@ func SetStdoutThreshold(threshold Threshold) {
 	reloadDefaultNotepad()
 }
 
+// SetStdoutOutput set the stdout output for the default notepad. Default is stdout.
+func SetStdoutOutput(handle io.Writer) {
+	defaultNotepad.outHandle = handle
+	defaultNotepad.init()
+	reloadDefaultNotepad()
+}
+
 // SetPrefix set the prefix for the default logger. Empty by default.
 func SetPrefix(prefix string) {
 	defaultNotepad.SetPrefix(prefix)
