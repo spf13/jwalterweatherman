@@ -100,7 +100,7 @@ func StdoutThreshold() Threshold {
 	return defaultNotepad.stdoutThreshold
 }
 
-// GetStdoutThreshold returns the defined Treshold for the log logger.
+// GetLogThreshold returns the defined Treshold for the log logger.
 func GetLogThreshold() Threshold {
 	return defaultNotepad.GetLogThreshold()
 }
