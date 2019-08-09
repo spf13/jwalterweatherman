@@ -12,12 +12,14 @@ import (
 	"log"
 )
 
+// Threshold specified the log level
 type Threshold int
 
 func (t Threshold) String() string {
 	return prefixes[t]
 }
 
+// define log level
 const (
 	LevelTrace Threshold = iota
 	LevelDebug
@@ -28,7 +30,7 @@ const (
 	LevelFatal
 )
 
-var prefixes map[Threshold]string = map[Threshold]string{
+var prefixes = map[Threshold]string{
 	LevelTrace:    "TRACE",
 	LevelDebug:    "DEBUG",
 	LevelInfo:     "INFO",
@@ -161,7 +163,7 @@ func (n *Notepad) SetLogOutput(handle io.Writer) {
 	n.init()
 }
 
-// GetStdoutThreshold returns the defined Treshold for the log logger.
+// GetLogThreshold returns the defined Treshold for the log logger.
 func (n *Notepad) GetLogThreshold() Threshold {
 	return n.logThreshold
 }
@@ -203,14 +205,19 @@ type Feedback struct {
 	log *log.Logger
 }
 
+// Println formats using the default formats for its operands and writes to output.
+// Spaces are always added between operands and a newline is appended.
 func (fb *Feedback) Println(v ...interface{}) {
 	fb.output(fmt.Sprintln(v...))
 }
 
+// Printf formats according to a format specifier and writes to output.
 func (fb *Feedback) Printf(format string, v ...interface{}) {
 	fb.output(fmt.Sprintf(format, v...))
 }
 
+// Print formats using the default formats for its operands and writes to output.
+// Spaces are added between operands when neither is a string.
 func (fb *Feedback) Print(v ...interface{}) {
 	fb.output(fmt.Sprint(v...))
 }

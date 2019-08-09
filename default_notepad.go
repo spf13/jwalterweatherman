@@ -12,6 +12,7 @@ import (
 	"os"
 )
 
+// easy to use
 var (
 	TRACE    *log.Logger
 	DEBUG    *log.Logger
@@ -90,17 +91,17 @@ func SetLogListeners(l ...LogListener) {
 	reloadDefaultNotepad()
 }
 
-// Level returns the current global log threshold.
+// LogThreshold returns the current global log threshold.
 func LogThreshold() Threshold {
 	return defaultNotepad.logThreshold
 }
 
-// Level returns the current global output threshold.
+// StdoutThreshold returns the current global output threshold.
 func StdoutThreshold() Threshold {
 	return defaultNotepad.stdoutThreshold
 }
 
-// GetStdoutThreshold returns the defined Treshold for the log logger.
+// GetLogThreshold returns the defined Treshold for the log logger.
 func GetLogThreshold() Threshold {
 	return defaultNotepad.GetLogThreshold()
 }
