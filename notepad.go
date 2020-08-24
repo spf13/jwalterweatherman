@@ -62,7 +62,7 @@ type Notepad struct {
 	logListeners []LogListener
 }
 
-// A LogListener can ble supplied to a Notepad to listen on log writes for a given
+// A LogListener can be supplied to a Notepad to listen on log writes for a given
 // threshold. This can be used to capture log events in unit tests and similar.
 // Note that this function will be invoked once for each log threshold. If
 // the given threshold is not of interest to you, return nil.
