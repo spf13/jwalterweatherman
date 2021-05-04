@@ -41,7 +41,7 @@ func reloadDefaultNotepad() {
 }
 
 func init() {
-	defaultNotepad = NewNotepad(LevelError, LevelWarn, os.Stdout, ioutil.Discard, "", log.Ldate|log.Ltime)
+	defaultNotepad = NewNotepad(LevelError, LevelWarn, os.Stdout, ioutil.Discard, "", log.Ldate|log.Ltime, false)
 	reloadDefaultNotepad()
 }
 
@@ -80,6 +80,13 @@ func SetPrefix(prefix string) {
 // SetFlags set the flags for the default logger. "log.Ldate | log.Ltime" by default.
 func SetFlags(flags int) {
 	defaultNotepad.SetFlags(flags)
+	reloadDefaultNotepad()
+}
+
+// UseColor enabled or disables colored output.
+func UseColor() {
+	defaultNotepad.UseColor()
+	defaultNotepad.init()
 	reloadDefaultNotepad()
 }
 

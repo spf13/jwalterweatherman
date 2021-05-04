@@ -20,6 +20,10 @@ func (t Threshold) String() string {
 	return prefixes[t]
 }
 
+func (t Threshold) ColoredString() string {
+	return coloredPrefixes[t]
+}
+
 const (
 	LevelTrace Threshold = iota
 	LevelDebug
@@ -30,23 +34,33 @@ const (
 	LevelFatal
 )
 
+var prefixes map[Threshold]string = map[Threshold]string{
+	LevelTrace:    "TRACE",
+	LevelDebug:    "DEBUG",
+	LevelInfo:     "INFO",
+	LevelWarn:     "WARN",
+	LevelError:    "ERROR",
+	LevelCritical: "CRITICAL",
+	LevelFatal:    "FATAL",
+}
+
 var (
-	debugColor    = color.New(color.FgHiBlack)
-	infoColor     = color.New(color.FgHiBlue)
-	warnColor     = color.New(color.FgHiYellow)
-	errorColor    = color.New(color.FgRed)
-	criticalColor = color.New(color.FgRed, color.Bold)
-	fatalColor    = color.New(color.BgHiRed, color.FgWhite, color.Bold)
+	DebugColor    = color.New(color.FgHiBlack)
+	InfoColor     = color.New(color.FgHiBlue)
+	WarnColor     = color.New(color.FgHiYellow)
+	ErrorColor    = color.New(color.FgRed)
+	CriticalColor = color.New(color.FgRed, color.Bold)
+	FatalColor    = color.New(color.FgHiRed, color.Italic, color.Bold)
 )
 
-var prefixes map[Threshold]string = map[Threshold]string{
+var coloredPrefixes map[Threshold]string = map[Threshold]string{
 	LevelTrace:    "[TRACE]",
-	LevelDebug:    fmt.Sprintf("[%s]", debugColor.Sprint("DEBUG")),
-	LevelInfo:     fmt.Sprintf("[%s]", infoColor.Sprint("INFO")),
-	LevelWarn:     fmt.Sprintf("[%s]", warnColor.Sprint("WARN")),
-	LevelError:    fmt.Sprintf("[%s]", errorColor.Sprint("ERROR")),
-	LevelCritical: fmt.Sprintf("[%s]", criticalColor.Sprint("CRITICAL")),
-	LevelFatal:    fmt.Sprintf("[%s]", fatalColor.Sprint("FATAL")),
+	LevelDebug:    fmt.Sprintf("[%s]", DebugColor.Sprint("DEBUG")),
+	LevelInfo:     fmt.Sprintf("[%s]", InfoColor.Sprint("INFO")),
+	LevelWarn:     fmt.Sprintf("[%s]", WarnColor.Sprint("WARN")),
+	LevelError:    fmt.Sprintf("[%s]", ErrorColor.Sprint("ERROR")),
+	LevelCritical: fmt.Sprintf("[%s]", CriticalColor.Sprint("CRITICAL")),
+	LevelFatal:    fmt.Sprintf("[%s]", FatalColor.Sprint("FATAL")),
 }
 
 // Notepad is where you leave a note!
@@ -69,6 +83,7 @@ type Notepad struct {
 	stdoutThreshold Threshold
 	prefix          string
 	flags           int
+	colored         bool
 
 	logListeners []LogListener
 }
@@ -87,7 +102,7 @@ func NewNotepad(
 	outThreshold Threshold,
 	logThreshold Threshold,
 	outHandle, logHandle io.Writer,
-	prefix string, flags int,
+	prefix string, flags int, color bool,
 	logListeners ...LogListener,
 ) *Notepad {
 
@@ -98,6 +113,7 @@ func NewNotepad(
 	n.logHandle = logHandle
 	n.stdoutThreshold = outThreshold
 	n.logThreshold = logThreshold
+	n.colored = color
 
 	if len(prefix) != 0 {
 		n.prefix = "[" + prefix + "] "
@@ -122,7 +138,12 @@ func (n *Notepad) init() {
 
 	for t, logger := range n.loggers {
 		threshold := Threshold(t)
-		prefix := n.prefix + threshold.String() + " "
+		prefix := ""
+		if n.colored {
+			prefix = n.prefix + threshold.ColoredString() + " "
+		} else {
+			prefix = n.prefix + threshold.String() + " "
+		}
 
 		switch {
 		case threshold >= n.logThreshold && threshold >= n.stdoutThreshold:
@@ -205,6 +226,11 @@ func (n *Notepad) SetPrefix(prefix string) {
 func (n *Notepad) SetFlags(flags int) {
 	n.flags = flags
 	n.init()
+}
+
+// UseColor enabled or disables colored output.
+func (n *Notepad) UseColor() {
+	n.colored = true
 }
 
 // Feedback writes plainly to the outHandle while
