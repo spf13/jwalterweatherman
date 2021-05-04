@@ -10,6 +10,8 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+
+	"github.com/fatih/color"
 )
 
 type Threshold int
@@ -28,14 +30,23 @@ const (
 	LevelFatal
 )
 
+var (
+	debugColor    = color.New(color.FgHiBlack)
+	infoColor     = color.New(color.FgHiBlue)
+	warnColor     = color.New(color.FgHiYellow)
+	errorColor    = color.New(color.FgRed)
+	criticalColor = color.New(color.FgRed, color.Bold)
+	fatalColor    = color.New(color.BgHiRed, color.FgWhite, color.Bold)
+)
+
 var prefixes map[Threshold]string = map[Threshold]string{
-	LevelTrace:    "TRACE",
-	LevelDebug:    "DEBUG",
-	LevelInfo:     "INFO",
-	LevelWarn:     "WARN",
-	LevelError:    "ERROR",
-	LevelCritical: "CRITICAL",
-	LevelFatal:    "FATAL",
+	LevelTrace:    "[TRACE]",
+	LevelDebug:    fmt.Sprintf("[%s]", debugColor.Sprint("DEBUG")),
+	LevelInfo:     fmt.Sprintf("[%s]", infoColor.Sprint("INFO")),
+	LevelWarn:     fmt.Sprintf("[%s]", warnColor.Sprint("WARN")),
+	LevelError:    fmt.Sprintf("[%s]", errorColor.Sprint("ERROR")),
+	LevelCritical: fmt.Sprintf("[%s]", criticalColor.Sprint("CRITICAL")),
+	LevelFatal:    fmt.Sprintf("[%s]", fatalColor.Sprint("FATAL")),
 }
 
 // Notepad is where you leave a note!
