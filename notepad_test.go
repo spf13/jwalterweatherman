@@ -8,8 +8,7 @@ package jwalterweatherman
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
-	"testing"
+		"testing"
 
 	"github.com/stretchr/testify/require"
 )
@@ -59,7 +58,7 @@ func TestNotepadLogListener(t *testing.T) {
 		return &infoBuff
 	}
 
-	n := NewNotepad(LevelCritical, LevelError, ioutil.Discard, ioutil.Discard, "TestNotePad", 0, infoCapture, errorCapture)
+	n := NewNotepad(LevelCritical, LevelError, io.Discard, io.Discard, "TestNotePad", 0, infoCapture, errorCapture)
 
 	n.DEBUG.Println("Some debug")
 	n.INFO.Println("Some info")

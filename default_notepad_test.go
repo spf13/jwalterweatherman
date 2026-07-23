@@ -6,9 +6,9 @@
 package jwalterweatherman
 
 import (
+	"io"
 	"bytes"
-	"io/ioutil"
-	"sync"
+		"sync"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -61,8 +61,8 @@ func TestDefaultLogging(t *testing.T) {
 func TestLogCounter(t *testing.T) {
 	assert := require.New(t)
 
-	defaultNotepad.logHandle = ioutil.Discard
-	defaultNotepad.outHandle = ioutil.Discard
+	defaultNotepad.logHandle = io.Discard
+	defaultNotepad.outHandle = io.Discard
 
 	errorCounter := &Counter{}
 
