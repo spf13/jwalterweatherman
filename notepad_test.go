@@ -78,9 +78,24 @@ func TestNotepadLogListener(t *testing.T) {
 }
 
 func TestThresholdString(t *testing.T) {
-	require.Equal(t, LevelError.String(), "ERROR")
 	require.Equal(t, LevelTrace.String(), "TRACE")
+	require.Equal(t, LevelDebug.String(), "DEBUG")
+	require.Equal(t, LevelInfo.String(), "INFO")
+	require.Equal(t, LevelWarn.String(), "WARN")
+	require.Equal(t, LevelError.String(), "ERROR")
+	require.Equal(t, LevelCritical.String(), "CRITICAL")
+	require.Equal(t, LevelFatal.String(), "FATAL")
 }
+
+func TestCounterReset(t *testing.T) {
+	c := &Counter{}
+	require.Equal(t, uint64(0), c.Count())
+	_, _ = c.Write([]byte("test"))
+	require.Equal(t, uint64(1), c.Count())
+	c.Reset()
+	require.Equal(t, uint64(0), c.Count())
+}
+
 
 func BenchmarkLogPrintOnlyToCounter(b *testing.B) {
 	var logHandle, outHandle bytes.Buffer
