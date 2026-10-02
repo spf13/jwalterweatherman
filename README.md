@@ -99,7 +99,7 @@ Under the default thresholds :
 
  * Debug, Trace & Info goto /dev/null
  * Warn and above is logged (when a log file/io.Writer is provided)
- * Error and above is printed to the terminal (stdout)
+ * Error and above is printed to the terminal (stderr)
 
 ### Changing the thresholds
 
@@ -134,6 +134,17 @@ JWW can log to any `io.Writer`:
 ```go
 
     jww.SetLogOutput(customWriter) 
+
+```
+
+### Setting stdout and stderr outputs
+
+JWW allows redirecting standard output and standard error to any `io.Writer`:
+
+```go
+
+    jww.SetStdoutOutput(customStdoutWriter)
+    jww.SetStderrOutput(customStderrWriter)
 
 ```
 

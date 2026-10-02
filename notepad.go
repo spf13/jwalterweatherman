@@ -54,6 +54,7 @@ type Notepad struct {
 	loggers         [7]**log.Logger
 	logHandle       io.Writer
 	outHandle       io.Writer
+	errHandle       io.Writer
 	logThreshold    Threshold
 	stdoutThreshold Threshold
 	prefix          string
@@ -105,13 +106,20 @@ func NewNotepad(
 	return n
 }
 
+func (n *Notepad) outWriterFor(threshold Threshold) io.Writer {
+	if threshold >= LevelError && n.errHandle != nil {
+		return n.errHandle
+	}
+	return n.outHandle
+}
+
 // init creates the loggers for each level depending on the notepad thresholds.
 func (n *Notepad) init() {
-	logAndOut := io.MultiWriter(n.outHandle, n.logHandle)
-
 	for t, logger := range n.loggers {
 		threshold := Threshold(t)
 		prefix := n.prefix + threshold.String() + " "
+		outWriter := n.outWriterFor(threshold)
+		logAndOut := io.MultiWriter(outWriter, n.logHandle)
 
 		switch {
 		case threshold >= n.logThreshold && threshold >= n.stdoutThreshold:
@@ -121,7 +129,7 @@ func (n *Notepad) init() {
 			*logger = log.New(n.createLogWriters(threshold, n.logHandle), prefix, n.flags)
 
 		case threshold >= n.stdoutThreshold:
-			*logger = log.New(n.createLogWriters(threshold, n.outHandle), prefix, n.flags)
+			*logger = log.New(n.createLogWriters(threshold, outWriter), prefix, n.flags)
 
 		default:
 			*logger = log.New(n.createLogWriters(threshold, ioutil.Discard), prefix, n.flags)
@@ -176,6 +184,36 @@ func (n *Notepad) SetStdoutThreshold(threshold Threshold) {
 // GetStdoutThreshold returns the Treshold for the stdout logger.
 func (n *Notepad) GetStdoutThreshold() Threshold {
 	return n.stdoutThreshold
+}
+
+// SetStdoutOutput changes the standard output writer.
+func (n *Notepad) SetStdoutOutput(handle io.Writer) {
+	n.outHandle = handle
+	n.init()
+}
+
+// GetStdoutOutput returns the standard output writer.
+func (n *Notepad) GetStdoutOutput() io.Writer {
+	return n.outHandle
+}
+
+// SetStderrOutput changes the standard error writer.
+func (n *Notepad) SetStderrOutput(handle io.Writer) {
+	n.errHandle = handle
+	n.init()
+}
+
+// SetErrOutput changes the standard error writer.
+func (n *Notepad) SetErrOutput(handle io.Writer) {
+	n.SetStderrOutput(handle)
+}
+
+// GetStderrOutput returns the standard error writer.
+func (n *Notepad) GetStderrOutput() io.Writer {
+	if n.errHandle != nil {
+		return n.errHandle
+	}
+	return n.outHandle
 }
 
 // SetPrefix changes the prefix used by the notepad. Prefixes are displayed between

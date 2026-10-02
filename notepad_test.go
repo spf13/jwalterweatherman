@@ -82,6 +82,34 @@ func TestThresholdString(t *testing.T) {
 	require.Equal(t, LevelTrace.String(), "TRACE")
 }
 
+func TestNotepadStderr(t *testing.T) {
+	var logHandle, outHandle, errHandle bytes.Buffer
+
+	n := NewNotepad(LevelInfo, LevelWarn, &outHandle, &logHandle, "TestStderr", 0)
+	n.SetStderrOutput(&errHandle)
+
+	require.Equal(t, &outHandle, n.GetStdoutOutput())
+	require.Equal(t, &errHandle, n.GetStderrOutput())
+
+	n.INFO.Println("info message")
+	n.WARN.Println("warn message")
+	n.ERROR.Println("error message")
+	n.CRITICAL.Println("critical message")
+	n.FATAL.Println("fatal message")
+
+	require.Contains(t, outHandle.String(), "[TestStderr] INFO info message")
+	require.Contains(t, outHandle.String(), "[TestStderr] WARN warn message")
+	require.NotContains(t, outHandle.String(), "error message")
+	require.NotContains(t, outHandle.String(), "critical message")
+	require.NotContains(t, outHandle.String(), "fatal message")
+
+	require.NotContains(t, errHandle.String(), "info message")
+	require.NotContains(t, errHandle.String(), "warn message")
+	require.Contains(t, errHandle.String(), "[TestStderr] ERROR error message")
+	require.Contains(t, errHandle.String(), "[TestStderr] CRITICAL critical message")
+	require.Contains(t, errHandle.String(), "[TestStderr] FATAL fatal message")
+}
+
 func BenchmarkLogPrintOnlyToCounter(b *testing.B) {
 	var logHandle, outHandle bytes.Buffer
 	n := NewNotepad(LevelCritical, LevelCritical, &outHandle, &logHandle, "TestNotePad", 0)

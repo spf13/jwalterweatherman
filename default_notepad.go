@@ -42,6 +42,8 @@ func reloadDefaultNotepad() {
 
 func init() {
 	defaultNotepad = NewNotepad(LevelError, LevelWarn, os.Stdout, ioutil.Discard, "", log.Ldate|log.Ltime)
+	defaultNotepad.errHandle = os.Stderr
+	defaultNotepad.init()
 	reloadDefaultNotepad()
 }
 
@@ -69,6 +71,28 @@ func SetStdoutOutput(handle io.Writer) {
 	defaultNotepad.outHandle = handle
 	defaultNotepad.init()
 	reloadDefaultNotepad()
+}
+
+// SetStderrOutput set the stderr output for the default notepad. Default is stderr.
+func SetStderrOutput(handle io.Writer) {
+	defaultNotepad.errHandle = handle
+	defaultNotepad.init()
+	reloadDefaultNotepad()
+}
+
+// SetErrOutput set the stderr output for the default notepad. Default is stderr.
+func SetErrOutput(handle io.Writer) {
+	SetStderrOutput(handle)
+}
+
+// GetStdoutOutput returns the stdout output for the default notepad.
+func GetStdoutOutput() io.Writer {
+	return defaultNotepad.GetStdoutOutput()
+}
+
+// GetStderrOutput returns the stderr output for the default notepad.
+func GetStderrOutput() io.Writer {
+	return defaultNotepad.GetStderrOutput()
 }
 
 // SetPrefix set the prefix for the default logger. Empty by default.
