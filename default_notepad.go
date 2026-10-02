@@ -77,6 +77,23 @@ func SetPrefix(prefix string) {
 	reloadDefaultNotepad()
 }
 
+// SetThresholdPrefix sets the prefix for a specific threshold on the default notepad.
+func SetThresholdPrefix(threshold Threshold, prefix string) {
+	defaultNotepad.SetThresholdPrefix(threshold, prefix)
+	reloadDefaultNotepad()
+}
+
+// SetThresholdPrefixes sets the prefixes for multiple thresholds on the default notepad.
+func SetThresholdPrefixes(prefixes map[Threshold]string) {
+	defaultNotepad.SetThresholdPrefixes(prefixes)
+	reloadDefaultNotepad()
+}
+
+// GetThresholdPrefix returns the prefix for a specific threshold on the default notepad.
+func GetThresholdPrefix(threshold Threshold) string {
+	return defaultNotepad.GetThresholdPrefix(threshold)
+}
+
 // SetFlags set the flags for the default logger. "log.Ldate | log.Ltime" by default.
 func SetFlags(flags int) {
 	defaultNotepad.SetFlags(flags)

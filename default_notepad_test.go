@@ -97,3 +97,32 @@ func TestLogCounter(t *testing.T) {
 
 	assert.Equal(uint64(102), errorCounter.Count())
 }
+
+func TestDefaultThresholdPrefix(t *testing.T) {
+	oldFlags := defaultNotepad.flags
+	defer func() {
+		SetThresholdPrefix(LevelError, LevelError.String())
+		SetThresholdPrefix(LevelInfo, LevelInfo.String())
+		SetFlags(oldFlags)
+	}()
+
+	var outputBuf bytes.Buffer
+	defaultNotepad.outHandle = &outputBuf
+	SetStdoutThreshold(LevelInfo)
+	SetFlags(0)
+
+	require.Equal(t, "ERROR", GetThresholdPrefix(LevelError))
+	SetThresholdPrefix(LevelError, "ERR")
+	require.Equal(t, "ERR", GetThresholdPrefix(LevelError))
+
+	SetThresholdPrefixes(map[Threshold]string{
+		LevelInfo: "INF",
+	})
+	require.Equal(t, "INF", GetThresholdPrefix(LevelInfo))
+
+	ERROR.Println("an error message")
+	INFO.Println("an info message")
+
+	require.Contains(t, outputBuf.String(), "ERR an error message")
+	require.Contains(t, outputBuf.String(), "INF an info message")
+}

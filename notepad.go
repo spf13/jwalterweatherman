@@ -57,7 +57,8 @@ type Notepad struct {
 	logThreshold    Threshold
 	stdoutThreshold Threshold
 	prefix          string
-	flags           int
+	flags             int
+	thresholdPrefixes map[Threshold]string
 
 	logListeners []LogListener
 }
@@ -80,7 +81,7 @@ func NewNotepad(
 	logListeners ...LogListener,
 ) *Notepad {
 
-	n := &Notepad{logListeners: logListeners}
+	n := &Notepad{logListeners: logListeners, thresholdPrefixes: make(map[Threshold]string)}
 
 	n.loggers = [7]**log.Logger{&n.TRACE, &n.DEBUG, &n.INFO, &n.WARN, &n.ERROR, &n.CRITICAL, &n.FATAL}
 	n.outHandle = outHandle
@@ -111,7 +112,13 @@ func (n *Notepad) init() {
 
 	for t, logger := range n.loggers {
 		threshold := Threshold(t)
-		prefix := n.prefix + threshold.String() + " "
+		thresholdPrefix := n.getThresholdPrefix(threshold)
+		var prefix string
+		if len(thresholdPrefix) != 0 {
+			prefix = n.prefix + thresholdPrefix + " "
+		} else {
+			prefix = n.prefix
+		}
 
 		switch {
 		case threshold >= n.logThreshold && threshold >= n.stdoutThreshold:
@@ -194,6 +201,40 @@ func (n *Notepad) SetPrefix(prefix string) {
 func (n *Notepad) SetFlags(flags int) {
 	n.flags = flags
 	n.init()
+}
+
+func (n *Notepad) getThresholdPrefix(t Threshold) string {
+	if n.thresholdPrefixes != nil {
+		if prefix, ok := n.thresholdPrefixes[t]; ok {
+			return prefix
+		}
+	}
+	return t.String()
+}
+
+// SetThresholdPrefix changes the prefix string for a specific threshold level.
+func (n *Notepad) SetThresholdPrefix(threshold Threshold, prefix string) {
+	if n.thresholdPrefixes == nil {
+		n.thresholdPrefixes = make(map[Threshold]string)
+	}
+	n.thresholdPrefixes[threshold] = prefix
+	n.init()
+}
+
+// SetThresholdPrefixes changes the prefix strings for multiple threshold levels.
+func (n *Notepad) SetThresholdPrefixes(prefixes map[Threshold]string) {
+	if n.thresholdPrefixes == nil {
+		n.thresholdPrefixes = make(map[Threshold]string)
+	}
+	for t, prefix := range prefixes {
+		n.thresholdPrefixes[t] = prefix
+	}
+	n.init()
+}
+
+// GetThresholdPrefix returns the prefix string for a specific threshold level.
+func (n *Notepad) GetThresholdPrefix(threshold Threshold) string {
+	return n.getThresholdPrefix(threshold)
 }
 
 // Feedback writes plainly to the outHandle while

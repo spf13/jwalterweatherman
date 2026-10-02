@@ -82,6 +82,69 @@ func TestThresholdString(t *testing.T) {
 	require.Equal(t, LevelTrace.String(), "TRACE")
 }
 
+func TestCustomThresholdPrefix(t *testing.T) {
+	var logHandle, outHandle bytes.Buffer
+
+	n := NewNotepad(LevelTrace, LevelTrace, &outHandle, &logHandle, "TestCustom", 0)
+
+	require.Equal(t, "INFO", n.GetThresholdPrefix(LevelInfo))
+	require.Equal(t, "WARN", n.GetThresholdPrefix(LevelWarn))
+
+	n.SetThresholdPrefix(LevelInfo, "INF")
+	n.SetThresholdPrefix(LevelWarn, "WRN")
+
+	require.Equal(t, "INF", n.GetThresholdPrefix(LevelInfo))
+	require.Equal(t, "WRN", n.GetThresholdPrefix(LevelWarn))
+	require.Equal(t, "DEBUG", n.GetThresholdPrefix(LevelDebug))
+
+	n.INFO.Println("info msg")
+	n.WARN.Println("warn msg")
+	n.DEBUG.Println("debug msg")
+
+	require.Contains(t, outHandle.String(), "[TestCustom] INF info msg")
+	require.Contains(t, outHandle.String(), "[TestCustom] WRN warn msg")
+	require.Contains(t, outHandle.String(), "[TestCustom] DEBUG debug msg")
+}
+
+func TestSetThresholdPrefixes(t *testing.T) {
+	var logHandle, outHandle bytes.Buffer
+
+	n := NewNotepad(LevelTrace, LevelTrace, &outHandle, &logHandle, "", 0)
+
+	n.SetThresholdPrefixes(map[Threshold]string{
+		LevelTrace:    "TRAC",
+		LevelDebug:    "DEBG",
+		LevelInfo:     "INFO",
+		LevelWarn:     "WARN",
+		LevelError:    "ERRO",
+		LevelCritical: "CRIT",
+		LevelFatal:    "FATL",
+	})
+
+	n.TRACE.Println("trace msg")
+	n.DEBUG.Println("debug msg")
+	n.ERROR.Println("error msg")
+	n.CRITICAL.Println("crit msg")
+	n.FATAL.Println("fatal msg")
+
+	require.Contains(t, outHandle.String(), "TRAC trace msg")
+	require.Contains(t, outHandle.String(), "DEBG debug msg")
+	require.Contains(t, outHandle.String(), "ERRO error msg")
+	require.Contains(t, outHandle.String(), "CRIT crit msg")
+	require.Contains(t, outHandle.String(), "FATL fatal msg")
+}
+
+func TestEmptyThresholdPrefix(t *testing.T) {
+	var logHandle, outHandle bytes.Buffer
+
+	n := NewNotepad(LevelTrace, LevelTrace, &outHandle, &logHandle, "", 0)
+
+	n.SetThresholdPrefix(LevelInfo, "")
+	n.INFO.Println("bare message")
+
+	require.Equal(t, "bare message\n", outHandle.String())
+}
+
 func BenchmarkLogPrintOnlyToCounter(b *testing.B) {
 	var logHandle, outHandle bytes.Buffer
 	n := NewNotepad(LevelCritical, LevelCritical, &outHandle, &logHandle, "TestNotePad", 0)
